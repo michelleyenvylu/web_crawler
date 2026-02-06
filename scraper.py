@@ -67,11 +67,12 @@ def extract_next_links(url, resp):
         
         # creating content hashes to check for duplicates or near duplicates
         data = _load_analytics()
-        content_hashes = data.setdefault("content_hashes", {})
+        content_hashes = data.setdefault("content_hashes", set())
         h = hashlib.sha256(text[:CONTENT_HASH_CHARS].encode("utf-8", errors="replace")).hexdigest()
         if h in content_hashes:
             return result
-        content_hashes[h] = 1
+        # content_hashes[h] = 1
+        content_hashes.add(h)
         _update_analytics(base_url, text)
         
         # adding hyperlinks to result and making sure there are no duplicate links
@@ -100,11 +101,12 @@ def extract_next_links(url, resp):
     
     # creating content hashes to check for duplicates or near duplicates
     data = _load_analytics()
-    content_hashes = data.setdefault("content_hashes", {})
+    content_hashes = data.setdefault("content_hashes", set)
     h = hashlib.sha256(text[:CONTENT_HASH_CHARS].encode("utf-8", errors="replace")).hexdigest()
     if h in content_hashes: # webpage has already been looked at before
         return result
-    content_hashes[h] = 1
+    # content_hashes[h] = 1
+    content_hashes.add(h)
     _update_analytics(base_url, text)
 
     # adding hyperlinks to result and making sure there are no duplicate links
