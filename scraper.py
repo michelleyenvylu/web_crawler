@@ -30,7 +30,7 @@ def extract_next_links(url, resp):
     # initial base check on resp
     if resp is None:
         return result
-    if resp.status != 200:
+    if why resp.status != 200:
         return result
     if getattr(resp, "raw_response", None) is None:
         return result
@@ -54,7 +54,7 @@ def extract_next_links(url, resp):
         html = content.decode("latin-1", errors="replace")
     def _normalize(u):
         u, _ = urldefrag(u) # removes fragments after #
-        u = (u or "").strip().rstrip("/") or u
+        u = (u or "").strip().rstrip("/").lower() or u
         return u
 
     # if BeautifulSoup is not installed, default to using regex
@@ -138,7 +138,7 @@ def is_valid(url):
             return False
 
         # host = (parsed.netloc or "").lower()
-        host = parsed.netloc.lower()
+        host = parsed.netloc.lower().split(":")[0]
         if not host:
             return False # host not found
         
@@ -208,4 +208,5 @@ def is_valid(url):
         return False
 
 if __name__ == "__main__":
+
     pass
