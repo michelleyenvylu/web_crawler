@@ -30,7 +30,7 @@ def extract_next_links(url, resp):
     # initial base check on resp
     if resp is None:
         return result
-    if why resp.status != 200:
+    if resp.status != 200: 
         return result
     if getattr(resp, "raw_response", None) is None:
         return result
