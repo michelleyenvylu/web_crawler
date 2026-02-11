@@ -141,7 +141,7 @@ def tokenize(text):
     for word in words:
         # .isalnum() accepts non-English characters while .isascii() doesn't
         # .isascii() accepts punctuation (, ! . - etc) while .isalnum() doesn't
-        if word.isalnum() and word.isascii() and len(word > 1):
+        if word.isalnum() and word.isascii() and len(word) > 1:
             tokens.append(word.lower())
         else:
             start_index = 0
