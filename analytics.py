@@ -5,42 +5,72 @@ from urllib.parse import urlparse, urljoin, urldefrag
 from constants import ANALYTICS_FILE, STOP_WORDS
 _analytics = None
 
-def generate_report(output_path="crawler_report.txt"):
+def is_real_word(token: str) -> bool:
+    """
+    Heuristic for 'real words':
+    - all lowercase letters a–z
+    - length >= 3
+    - not in STOP_WORDS
+    """
+    if not token:
+        return False
+    if token in STOP_WORDS:
+        return False
+    if not re.fullmatch(r"[a-z]+", token):
+        return False
+    if len(token) < 3:
+        return False
+    return True
+
+def generate_clean_report(output_path: str = "crawler_report_clean.txt") -> None:
     if not os.path.exists(ANALYTICS_FILE):
         print(f"No {ANALYTICS_FILE} found. Run the crawler first.")
         return
+
     with open(ANALYTICS_FILE, "r", encoding="utf-8") as f:
         data = json.load(f)
+
     lines = []
 
+
     unique_urls = data.get("unique_urls", [])
-    # if isinstance(unique_urls, dict):
-    #     unique_urls = list(unique_urls.keys())
     lines.append(f"1. Unique pages found: {len(unique_urls)}")
     lines.append("")
+
 
     longest_url = data.get("longest_page_url", "")
     longest_words = data.get("longest_page_words", 0)
     lines.append(f"2. Longest page (by word count): {longest_words} words")
     lines.append(f"   URL: {longest_url}")
     lines.append("")
-    
-    word_freq = data.get("word_freq", {})
-    top50 = sorted(word_freq.items(), key=lambda x: -x[1])[:50] #this shouldn't be needed if word_freq is already sorted from hw 1
-    lines.append("3. Top 50 most common words (excluding stop words), ordered by frequency:")
+
+
+    raw_word_freq = data.get("word_freq", {})
+
+    clean_word_freq = {}
+    for token, count in raw_word_freq.items():
+        token = token.lower()
+        if is_real_word(token):
+            clean_word_freq[token] = clean_word_freq.get(token, 0) + count
+
+    top50 = sorted(clean_word_freq.items(), key=lambda x: -x[1])[:50]
+
+    lines.append("3. Top 50 most common words (excluding stop words, filtered), ordered by frequency:")
     for w, c in top50:
         lines.append(f"   {w}: {c}")
     lines.append("")
+
 
     subdomain_count = data.get("subdomain_count", {})
     lines.append("4. Subdomains in uci.edu (alphabetically), with unique page count:")
     for subdomain in sorted(subdomain_count.keys()):
         lines.append(f"   {subdomain}, {subdomain_count[subdomain]}")
-    
+
     text = "\n".join(lines)
     with open(output_path, "w", encoding="utf-8") as f:
         f.write(text)
-    print(f"Report written to {output_path}")
+
+    print(f"Clean report written to {output_path}")
 
 def _load_analytics():
     global _analytics
@@ -118,7 +148,6 @@ def _update_analytics(url, text):
                 data["subdomain_count"][host] = data["subdomain_count"].get(host, 0) + 1
         except Exception:
             pass
-    # should probably use hw1 code here
     # words = re.findall(r"[a-zA-Z]{3,}", text.lower())
     words = tokenize(text)
     word_count = len(words)
@@ -160,4 +189,4 @@ def tokenize(text):
     return tokens
 
 if __name__ == "__main__":
-    generate_report()
+    generate_clean_report()
