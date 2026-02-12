@@ -158,3 +158,6 @@ def tokenize(text):
                 tokens.append(word[start_index:].lower())
 
     return tokens
+
+if __name__ == "__main__":
+    generate_report()

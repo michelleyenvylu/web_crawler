@@ -82,11 +82,14 @@ def extract_next_links(url, resp):
             href = match.group(1).strip() # getting only the url
             if not href or href.startswith("#") or href.lower().startswith("javascript:"):
                 continue
-            absolute = urljoin(base_url, href)
-            norm = _normalize(absolute)
-            if norm and norm not in seen: # add link if it is not a duplicate
-                seen.add(norm)
-                result.append(norm)
+            try:
+                absolute = urljoin(base_url, href)
+                norm = _normalize(absolute)
+                if norm and norm not in seen: # add link if it is not a duplicate
+                    seen.add(norm)
+                    result.append(norm)
+            except (ValueError, Exception):
+                continue
         return result
 
     # using BeautifulSoup if it is installed
